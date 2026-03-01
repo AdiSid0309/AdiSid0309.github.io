@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Portfolio – Freelance Showcase</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #080a0f;
+    --surface: #0f1218;
+    --card: #13171f;
+    --border: #1e2430;
+    --accent1: #00e5ff;
+    --accent2: #7c3aed;
+    --accent3: #f59e0b;
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --green: #10b981;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* CURSOR */
+  .cursor {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--accent1);
+    position: fixed; pointer-events: none; z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s, background 0.3s;
+    mix-blend-mode: screen;
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,229,255,0.4);
+    position: fixed; pointer-events: none; z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: all 0.15s ease;
+  }
+
+  /* NOISE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 1; opacity: 0.5;
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    text-align: center;
+    /* UPDATED: Added larger bottom padding (8rem) to make room for scroll hint */
+    padding: 2rem 2rem 8rem 2rem; 
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 60% at 50% 40%, rgba(124,58,237,0.12) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 40% at 80% 20%, rgba(0,229,255,0.07) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 40% at 20% 80%, rgba(245,158,11,0.05) 0%, transparent 60%);
+  }
+
+  .grid-lines {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 80% at center, black 40%, transparent 100%);
+  }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(0,229,255,0.08);
+    border: 1px solid rgba(0,229,255,0.2);
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-size: 0.72rem;
+    color: var(--accent1);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite; }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(3rem, 8vw, 7rem);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    animation: fadeUp 0.7s 0.1s ease both;
+    position: relative;
+  }
+
+  .hero h1 span {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    color: transparent;
+    -webkit-text-stroke: 1px var(--accent1);
+    display: block;
+  }
+
+  .hero-sub {
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: var(--muted);
+    max-width: 500px;
+    line-height: 1.8;
+    animation: fadeUp 0.7s 0.2s ease both;
+  }
+
+  .hero-tags {
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+    margin-top: 2rem;
+    animation: fadeUp 0.7s 0.3s ease both;
+  }
+
+  .tag {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    padding: 4px 14px;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  .contact-card {
+    margin-top: 2.5rem;
+    /* UPDATED: Added margin-bottom as an extra safeguard */
+    margin-bottom: 1rem; 
+    padding: 1.25rem 2.5rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.02);
+    animation: fadeUp 0.7s 0.4s ease both;
+    backdrop-filter: blur(10px);
+  }
+
+  .scroll-hint {
+    position: absolute; bottom: 2rem;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    color: var(--muted); font-size: 0.7rem; letter-spacing: 0.1em;
+    animation: fadeUp 1s 0.5s ease both;
+  }
+  .scroll-line { width: 1px; height: 50px; background: linear-gradient(var(--accent1), transparent); animation: scrollDown 2s infinite; }
+  @keyframes scrollDown { 0%{transform:scaleY(0);transform-origin:top} 50%{transform:scaleY(1);transform-origin:top} 51%{transform-origin:bottom} 100%{transform:scaleY(0);transform-origin:bottom} }
+
+  /* SECTIONS */
+  section { padding: 5rem 2rem; position: relative; z-index: 2; }
+  .section-label {
+    font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--accent1); margin-bottom: 0.75rem;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    margin-bottom: 3rem;
+    line-height: 1.1;
+  }
+
+  .container { max-width: 1200px; margin: 0 auto; }
+
+  /* PROJECT CARDS */
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .project-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.75rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    cursor: none;
+  }
+
+  .project-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    opacity: 0;
+    transition: opacity 0.4s;
+    border-radius: 12px;
+  }
+
+  .project-card:hover { transform: translateY(-4px); }
+  .project-card:hover::before { opacity: 1; }
+
+  .card-c1:hover { border-color: rgba(0,229,255,0.4); box-shadow: 0 20px 60px rgba(0,229,255,0.08); }
+  .card-c1::before { background: radial-gradient(ellipse 60% 60% at 0% 0%, rgba(0,229,255,0.06) 0%, transparent 100%); }
+  .card-c2:hover { border-color: rgba(124,58,237,0.5); box-shadow: 0 20px 60px rgba(124,58,237,0.1); }
+  .card-c2::before { background: radial-gradient(ellipse 60% 60% at 100% 0%, rgba(124,58,237,0.08) 0%, transparent 100%); }
+  .card-c3:hover { border-color: rgba(245,158,11,0.4); box-shadow: 0 20px 60px rgba(245,158,11,0.08); }
+  .card-c3::before { background: radial-gradient(ellipse 60% 60% at 0% 100%, rgba(245,158,11,0.06) 0%, transparent 100%); }
+  .card-c4:hover { border-color: rgba(16,185,129,0.4); box-shadow: 0 20px 60px rgba(16,185,129,0.08); }
+  .card-c4::before { background: radial-gradient(ellipse 60% 60% at 100% 100%, rgba(16,185,129,0.06) 0%, transparent 100%); }
+
+  .card-icon {
+    width: 44px; height: 44px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .card-number {
+    position: absolute; top: 1.5rem; right: 1.5rem;
+    font-size: 0.65rem; color: var(--border);
+    letter-spacing: 0.1em;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.15rem; font-weight: 700;
+    margin-bottom: 0.6rem;
+  }
+
+  .card-desc {
+    font-size: 0.78rem; color: var(--muted); line-height: 1.75;
+    margin-bottom: 1.25rem;
+  }
+
+  .card-stack {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-bottom: 1.25rem;
+  }
+
+  .stack-pill {
+    font-size: 0.65rem; padding: 3px 10px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  .card-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .price {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 0.95rem;
+  }
+
+  .price span {
+    font-size: 0.7rem; color: var(--muted); font-weight: 400; font-family: 'DM Mono', monospace;
+  }
+
+  .price-badge {
+    font-size: 0.65rem; color: var(--green);
+    background: rgba(16,185,129,0.08);
+    border: 1px solid rgba(16,185,129,0.2);
+    padding: 3px 10px; border-radius: 3px;
+    letter-spacing: 0.05em;
+  }
+
+  /* MINI UI PREVIEWS */
+  .previews-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .preview-card {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--card);
+  }
+
+  .preview-header {
+    padding: 0.75rem 1rem;
+    background: rgba(255,255,255,0.02);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .dot-row { display: flex; gap: 5px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; }
+
+  .preview-body { padding: 1rem; }
+
+  /* CHATBOT PREVIEW */
+  .chat-preview { font-size: 0.72rem; }
+  .chat-msg { margin-bottom: 0.75rem; display: flex; gap: 8px; }
+  .chat-msg.user { justify-content: flex-end; }
+  .bubble {
+    padding: 8px 12px; border-radius: 10px;
+    max-width: 80%; line-height: 1.5;
+  }
+  .bubble.ai { background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.15); color: var(--text); }
+  .bubble.user-b { background: rgba(124,58,237,0.15); border: 1px solid rgba(124,58,237,0.25); color: var(--text); }
+  .chat-input-row {
+    display: flex; gap: 8px; margin-top: 1rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 10px;
+    align-items: center;
+  }
+  .chat-placeholder { flex: 1; font-size: 0.68rem; color: var(--muted); }
+  .send-btn {
+    width: 24px; height: 24px; border-radius: 6px;
+    background: var(--accent1); display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; color: #000; font-weight: 700;
+  }
+
+  /* DOC ANALYZER PREVIEW */
+  .doc-preview { font-size: 0.72rem; }
+  .doc-file {
+    background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.2);
+    border-radius: 8px; padding: 10px 12px;
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 1rem;
+  }
+  .doc-icon { font-size: 1.2rem; }
+  .doc-name { color: var(--accent3); font-weight: 500; font-size: 0.75rem; }
+  .doc-size { color: var(--muted); font-size: 0.65rem; }
+  .insight-row {
+    display: flex; align-items: flex-start; gap: 8px;
+    margin-bottom: 0.6rem;
+    padding: 8px; border-radius: 6px;
+    background: rgba(255,255,255,0.02);
+  }
+  .insight-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); margin-top: 4px; flex-shrink: 0; }
+  .insight-text { color: var(--muted); line-height: 1.5; font-size: 0.7rem; }
+
+  /* DASHBOARD PREVIEW */
+  .dash-preview { font-size: 0.72rem; }
+  .dash-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1rem; }
+  .metric-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 12px;
+  }
+  .metric-label { font-size: 0.6rem; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .metric-val { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; }
+  .metric-change { font-size: 0.62rem; color: var(--green); margin-top: 2px; }
+  .mini-chart {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 12px; height: 60px;
+    display: flex; align-items: flex-end; gap: 4px; overflow: hidden;
+  }
+  .bar { border-radius: 3px 3px 0 0; flex: 1; background: rgba(0,229,255,0.2); transition: height 0.3s; }
+  .bar.active { background: var(--accent1); }
+
+  /* CONTENT GEN PREVIEW */
+  .content-preview { font-size: 0.72rem; }
+  .content-form-row { margin-bottom: 0.75rem; }
+  .form-label { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+  .form-input {
+    width: 100%; background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px; padding: 7px 10px;
+    font-size: 0.7rem; color: var(--text);
+    font-family: 'DM Mono', monospace;
+  }
+  .tone-row { display: flex; gap: 6px; }
+  .tone-chip {
+    font-size: 0.62rem; padding: 4px 10px; border-radius: 4px;
+    border: 1px solid var(--border); color: var(--muted); cursor: pointer;
+  }
+  .tone-chip.active { border-color: var(--accent2); color: var(--accent2); background: rgba(124,58,237,0.08); }
+  .gen-btn {
+    width: 100%; padding: 8px;
+    background: linear-gradient(135deg, var(--accent2), #4f46e5);
+    border-radius: 6px; text-align: center;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.75rem;
+    margin-top: 0.75rem; color: white;
+  }
+
+  /* TIPS SECTION */
+  .tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+  .tip-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 1.25rem;
+  }
+  .tip-num { font-size: 0.65rem; color: var(--accent1); letter-spacing: 0.1em; margin-bottom: 0.5rem; }
+  .tip-title { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; margin-bottom: 0.4rem; }
+  .tip-body { font-size: 0.73rem; color: var(--muted); line-height: 1.7; }
+
+  /* FOOTER */
+  footer {
+    padding: 3rem 2rem;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    font-size: 0.72rem; color: var(--muted);
+    position: relative; z-index: 2;
+  }
+
+  footer strong { color: var(--accent1); }
+
+  /* ANIMATIONS */
+  .fade-in {
+    opacity: 0; transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="grid-lines"></div>
+  <div class="badge"><span class="badge-dot"></span> Available for Freelance</div>
+  <h1>
+    AI & GenAI
+    <span>Automation</span>
+    Projects
+  </h1>
+  <p class="hero-sub">Cutting-edge AI solutions that transform how businesses operate — from intelligent chatbots to full workflow automation.</p>
+  <div class="hero-tags">
+    <span class="tag">LangChain</span>
+    <span class="tag">RAG</span>
+    <span class="tag">OpenAI API</span>
+    <span class="tag">n8n</span>
+    <span class="tag">Zapier</span>
+    <span class="tag">Claude API</span>
+    <span class="tag">Stable Diffusion</span>
+    <span class="tag">Vector DB</span>
+  </div>
+  
+  <div class="contact-card">
+    <div style="font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">Contact Me</div>
+    <div style="font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--text);">Siddharth Soni</div>
+    <div style="color: var(--accent1); font-size: 1rem; margin-top: 0.25rem;">+91 6377921784</div>
+  </div>
+
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    SCROLL
+  </div>
+</div>
+
+<section>
+  <div class="container">
+    <div class="section-label">// Portfolio</div>
+    <h2 class="section-title">Featured Projects</h2>
+    <div class="projects-grid">
+
+      <div class="project-card card-c1 fade-in">
+        <div class="card-number">01 / 08</div>
+        <div class="card-icon" style="background:rgba(0,229,255,0.08);border:1px solid rgba(0,229,255,0.2)">🤖</div>
+        <div class="card-title">AI Customer Support Chatbot</div>
+        <div class="card-desc">Custom-trained chatbot integrated into your website or app. Handles FAQs, ticket creation, and seamless handoff to human agents. Reduces support load by 60–70%.</div>
+        <div class="card-stack">
+          <span class="stack-pill">OpenAI GPT-4o</span>
+          <span class="stack-pill">LangChain</span>
+          <span class="stack-pill">Pinecone</span>
+          <span class="stack-pill">React</span>
+          <span class="stack-pill">FastAPI</span>
+        </div>
+        <div class="card-footer">
+          <div class="price" style="color:var(--accent1)">$80 – $2,50 <br><span>₹7.5K – ₹23K</span></div>
+          <div class="price-badge">HIGH DEMAND</div>
+        </div>
+      </div>
+
+      <div class="project-card card-c2 fade-in">
+        <div class="card-number">02 / 08</div>
+        <div class="card-icon" style="background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.25)">📄</div>
+        <div class="card-title">Document Intelligence System</div>
+        <div class="card-desc">Upload PDFs, contracts, or reports and ask questions in natural language. Extract insights, compare documents, and auto-summarize. Perfect for legal, finance, and HR.</div>
+        <div class="card-stack">
+          <span class="stack-pill">Claude API</span>
+          <span class="stack-pill">LlamaIndex</span>
+          <span class="stack-pill">ChromaDB</span>
+          <span class="stack-pill">Next.js</span>
+        </div>
+        <div class="card-footer">
+          <div class="price" style="color:var(--accent2)">$1,20 – $4,000 <br><span>₹11K – ₹37K</span></div>
+          <div class="price-badge">HIGH DEMAND</div>
+        </div>
+      </div>
+
+      <div class="project-card card-c3 fade-in">
+        <div class="card-number">03 / 08</div>
+        <div class="card-icon" style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25)">📊</div>
+        <div class="card-title">AI Analytics Dashboard</div>
+        <div class="card-desc">Connect to your data sources and get AI-generated summaries, anomaly detection, and predictive insights. Business intelligence without the complexity.</div>
+        <div class="card-stack">
+          <span class="stack-pill">Python</span>
+          <span class="stack-pill">OpenAI</span>
+          <span class="stack-pill">Pandas</span>
+          <span class="stack-pill">Plotly</span>
+          <span class="stack-pill">Streamlit</span>
+        </div>
+        <div class="card-footer">
+          <div class="price" style="color:var(--accent3)">$1,00 – $3,50 <br><span>₹9K – ₹32K</span></div>
+          <div class="price-badge">TRENDING</div>
+        </div>
+      </div>
+
+      <div class="project-card card-c4 fade-in">
+        <div class="card-number">04 / 08</div>
+        <div class="card-icon" style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25)">🔁</div>
+        <div class="card-title">Workflow Automation Bot</div>
+        <div class="card-desc">Automate repetitive business processes: invoice processing, email triage, CRM updates, and lead qualification. Build with no-code tools enhanced with AI decision-making.</div>
+        <div class="card-stack">
+          <span class="stack-pill">n8n</span>
+          <span class="stack-pill">Make.com</span>
+          <span class="stack-pill">GPT-4</span>
+          <span class="stack-pill">Zapier</span>
+          <span class="stack-pill">Airtable</span>
+        </div>
+        <div class="card-footer">
+          <div class="price" style="color:var(--green)">$50 – $2,00 <br><span>₹5K – ₹19K</span></div>
+          <div class="price-badge">QUICK WIN</div>
+        </div>
+      </div>
+
+      <div class="project-card card-c1 fade-in">
+        <div class="card-number">05 / 08</div>
+        <div class="card-icon" style="background:rgba(0,229,255,0.08);border:1px solid rgba(0,229,255,0.2)">✍️</div>
+        <div class="card-title">AI Content Generator</div>
+        <div class="card-desc">Multi-channel content pipeline that generates blog posts, LinkedIn updates, email campaigns, and ad copy in your brand voice. Schedule and publish automatically.</div>
+        <div class="card-stack">
+          <span class="stack-pill">GPT-4o</span>
+          <span class="stack-pill">Claude</span>
+          <span class="stack-pill">Buffer API</span>
+          <span class="stack-pill">Node.js</span>
+        </div>
+        <div class="card-footer">
+          <div class="price" style="color:var(--accent1)">$60 – $1,80 <br><span>₹5K – ₹15K</span></div>
+          <div class="price-badge">POPULAR</div>
+        </div>
+      </div>
+
+      <div class="project-card card-c2 fade-in">
+        <div class="card-number">06 / 08</div>
+        <div class="card-icon" style="background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.25)">🔍</div>
+        <div class="card-title">RAG-Powered Search App</div>
+        <div class="card-desc">Replace your basic keyword search with AI-powered semantic search. Users find exactly what they need using natural questions. Works on any content: docs, products, or knowledge bases.</div>
+        <div class="card-stack">
+          <span class="stack-pill">LangChain</span>
+          <span class="stack-pill">Weaviate</span>
+          <span class="stack-pill">Embeddings</span>
+          <span class="stack-pill">FastAPI</span>
+        </div>
+        <div class="card-footer">
+          <div class="price" style="color:var(--accent2)">$1,50 – $5,00 <br><span>₹13K – ₹45</span></div>
+          <div class="price-badge">TECHNICAL</div>
+        </div>
+      </div>
+
+      <div class="project-card card-c3 fade-in">
+        <div class="card-number">07 / 08</div>
+        <div class="card-icon" style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25)">🗣️</div>
+        <div class="card-title">Voice AI Agent</div>
+        <div class="card-desc">Phone and voice-based AI agents for appointment booking, order tracking, or support. Real-time transcription + AI reasoning + natural TTS voice. Answer calls 24/7.</div>
+        <div class="card-stack">
+          <span class="stack-pill">Whisper</span>
+          <span class="stack-pill">ElevenLabs</span>
+          <span class="stack-pill">GPT-4o</span>
+          <span class="stack-pill">Twilio</span>
+          <span class="stack-pill">Python</span>
+        </div>
+        <div class="card-footer">
+          <div class="price" style="color:var(--accent3)">$2,00 – $6,00 <br><span>₹18K – ₹55K</span></div>
+          <div class="price-badge">PREMIUM</div>
+        </div>
+      </div>
+
+      <div class="project-card card-c4 fade-in">
+        <div class="card-number">08 / 08</div>
+        <div class="card-icon" style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25)">🎨</div>
+        <div class="card-title">AI Image Generation Pipeline</div>
+        <div class="card-desc">Automated pipeline for generating product mockups, social media visuals, or marketing assets at scale. Upload a brief, get branded visuals in minutes, not days.</div>
+        <div class="card-stack">
+          <span class="stack-pill">DALL-E 3</span>
+          <span class="stack-pill">Stable Diffusion</span>
+          <span class="stack-pill">ComfyUI</span>
+          <span class="stack-pill">Python</span>
+        </div>
+        <div class="card-footer">
+          <div class="price" style="color:var(--green)">$80 – $2,50 <br><span>₹7.5K – ₹23K</span></div>
+          <div class="price-badge">CREATIVE</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section style="background:rgba(255,255,255,0.01); border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="section-label">// Sample UI Templates</div>
+    <h2 class="section-title">Demo Interfaces</h2>
+    <div class="previews-grid">
+
+      <div class="preview-card fade-in">
+        <div class="preview-header">
+          <div class="dot-row">
+            <div class="dot" style="background:#ff5f57"></div>
+            <div class="dot" style="background:#febc2e"></div>
+            <div class="dot" style="background:#28c840"></div>
+          </div>
+          <span style="font-size:0.65rem;color:var(--muted);margin-left:8px;">SupportAI — Chat Interface</span>
+        </div>
+        <div class="preview-body">
+          <div class="chat-preview">
+            <div class="chat-msg">
+              <div class="bubble ai">👋 Hi! I'm your AI assistant. How can I help you today?</div>
+            </div>
+            <div class="chat-msg user">
+              <div class="bubble user-b">What's the refund policy?</div>
+            </div>
+            <div class="chat-msg">
+              <div class="bubble ai">Our refund policy allows returns within 30 days of purchase. Would you like me to initiate a refund for a specific order?</div>
+            </div>
+            <div class="chat-input-row">
+              <span class="chat-placeholder">Type a message...</span>
+              <div class="send-btn">↑</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="preview-card fade-in">
+        <div class="preview-header">
+          <div class="dot-row">
+            <div class="dot" style="background:#ff5f57"></div>
+            <div class="dot" style="background:#febc2e"></div>
+            <div class="dot" style="background:#28c840"></div>
+          </div>
+          <span style="font-size:0.65rem;color:var(--muted);margin-left:8px;">DocMind — Document Analyzer</span>
+        </div>
+        <div class="preview-body doc-preview">
+          <div class="doc-file">
+            <div class="doc-icon">📑</div>
+            <div>
+              <div class="doc-name">Q4_Contract_Final.pdf</div>
+              <div class="doc-size">2.4 MB · 47 pages · Analyzed ✓</div>
+            </div>
+          </div>
+          <div style="font-size:0.65rem;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.08em;">AI Insights</div>
+          <div class="insight-row">
+            <div class="insight-dot"></div>
+            <div class="insight-text">Contract expires March 15, 2026 — renewal clause on page 12</div>
+          </div>
+          <div class="insight-row">
+            <div class="insight-dot" style="background:var(--accent3)"></div>
+            <div class="insight-text">⚠️ Penalty clause detected: $50K for late delivery</div>
+          </div>
+          <div class="insight-row">
+            <div class="insight-dot"></div>
+            <div class="insight-text">Liability cap set at 2x contract value ($240K)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="preview-card fade-in">
+        <div class="preview-header">
+          <div class="dot-row">
+            <div class="dot" style="background:#ff5f57"></div>
+            <div class="dot" style="background:#febc2e"></div>
+            <div class="dot" style="background:#28c840"></div>
+          </div>
+          <span style="font-size:0.65rem;color:var(--muted);margin-left:8px;">InsightAI — Analytics Dashboard</span>
+        </div>
+        <div class="preview-body dash-preview">
+          <div class="dash-metrics">
+            <div class="metric-box">
+              <div class="metric-label">Revenue</div>
+              <div class="metric-val" style="color:var(--accent1)">$84.2K</div>
+              <div class="metric-change">↑ +12.3% vs last month</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-label">Churn Risk</div>
+              <div class="metric-val" style="color:var(--accent3)">23</div>
+              <div class="metric-change" style="color:var(--accent3)">⚠ users flagged</div>
+            </div>
+          </div>
+          <div class="mini-chart">
+            <div class="bar" style="height:30%"></div>
+            <div class="bar" style="height:50%"></div>
+            <div class="bar" style="height:40%"></div>
+            <div class="bar" style="height:70%"></div>
+            <div class="bar active" style="height:90%"></div>
+            <div class="bar" style="height:60%"></div>
+            <div class="bar" style="height:75%"></div>
+          </div>
+          <div style="font-size:0.63rem;color:var(--muted);margin-top:8px;padding:8px;background:rgba(0,229,255,0.04);border:1px solid rgba(0,229,255,0.1);border-radius:6px;line-height:1.6;">
+            🤖 AI Summary: Revenue peaked Tuesday driven by campaign #47. 3 customers at high churn risk — recommend outreach.
+          </div>
+        </div>
+      </div>
+
+      <div class="preview-card fade-in">
+        <div class="preview-header">
+          <div class="dot-row">
+            <div class="dot" style="background:#ff5f57"></div>
+            <div class="dot" style="background:#febc2e"></div>
+            <div class="dot" style="background:#28c840"></div>
+          </div>
+          <span style="font-size:0.65rem;color:var(--muted);margin-left:8px;">ContentAI — Content Generator</span>
+        </div>
+        <div class="preview-body content-preview">
+          <div class="content-form-row">
+            <div class="form-label">Topic / Brief</div>
+            <div class="form-input" style="color:var(--muted)">5 productivity tips for remote teams...</div>
+          </div>
+          <div class="content-form-row">
+            <div class="form-label">Tone</div>
+            <div class="tone-row">
+              <div class="tone-chip">Formal</div>
+              <div class="tone-chip active">Casual</div>
+              <div class="tone-chip">Bold</div>
+              <div class="tone-chip">Witty</div>
+            </div>
+          </div>
+          <div class="content-form-row">
+            <div class="form-label">Output Type</div>
+            <div class="tone-row">
+              <div class="tone-chip active">LinkedIn</div>
+              <div class="tone-chip">Blog</div>
+              <div class="tone-chip">Email</div>
+            </div>
+          </div>
+          <div class="gen-btn">⚡ Generate Content</div>
+        </div>
+      </div>
+
+      <div class="preview-card fade-in">
+        <div class="preview-header">
+          <div class="dot-row">
+            <div class="dot" style="background:#ff5f57"></div>
+            <div class="dot" style="background:#febc2e"></div>
+            <div class="dot" style="background:#28c840"></div>
+          </div>
+          <span style="font-size:0.65rem;color:var(--muted);margin-left:8px;">VoiceAI — Call Agent</span>
+        </div>
+        <div class="preview-body">
+          <div style="text-align:center;padding:1rem 0;">
+            <div style="width:60px;height:60px;border-radius:50%;background:rgba(245,158,11,0.1);border:2px solid rgba(245,158,11,0.3);margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;font-size:1.5rem;box-shadow:0 0 30px rgba(245,158,11,0.15);">🎙️</div>
+            <div style="font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:700;margin-bottom:4px;">On Call · 01:24</div>
+            <div style="font-size:0.65rem;color:var(--green);margin-bottom:1rem;">● Live Transcription Active</div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:0.68rem;color:var(--muted);line-height:1.7;">
+            <span style="color:var(--accent3)">Caller:</span> "I'd like to reschedule my appointment..."<br>
+            <span style="color:var(--accent1)">AI Agent:</span> "Sure! I can see your booking for March 5th. Would Thursday the 7th work for you?"
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+<!-- 
+<section>
+  <div class="container">
+    <div class="section-label">// Strategy</div>
+    <h2 class="section-title">Winning on Freelance Platforms</h2>
+    <div class="tips-grid">
+      <div class="tip-card fade-in">
+        <div class="tip-num">01 —</div>
+        <div class="tip-title">Start with Quick Wins</div>
+        <div class="tip-body">Workflow automation and chatbot projects are fast to build ($500–2K range) and give you reviews quickly. Use these to build your initial reputation.</div>
+      </div>
+      <div class="tip-card fade-in">
+        <div class="tip-num">02 —</div>
+        <div class="tip-title">Niche Down Your Profile</div>
+        <div class="tip-body">Don't say "AI developer." Say "AI chatbot specialist for e-commerce" or "LangChain RAG developer for legal firms." Specific profiles get more clicks.</div>
+      </div>
+      <div class="tip-card fade-in">
+        <div class="tip-num">03 —</div>
+        <div class="tip-title">Show, Don't Tell</div>
+        <div class="tip-body">Build 2–3 live demos you can link in your profile. A working chatbot or dashboard demo is worth more than 5 case studies. Host on Vercel or HuggingFace.</div>
+      </div>
+      <div class="tip-card fade-in">
+        <div class="tip-num">04 —</div>
+        <div class="tip-title">Price for Value, Not Hours</div>
+        <div class="tip-body">A chatbot that saves 20 hours/week of support work is worth $2K+ regardless of build time. Anchor your pricing to business impact, not your time.</div>
+      </div>
+      <div class="tip-card fade-in">
+        <div class="tip-num">05 —</div>
+        <div class="tip-title">Offer a Discovery Call Package</div>
+        <div class="tip-body">Sell a $150 "AI Audit" gig that reviews a client's workflow. This warms them up and naturally leads to larger implementation projects.</div>
+      </div>
+      <div class="tip-card fade-in">
+        <div class="tip-num">06 —</div>
+        <div class="tip-title">Stack Retainer Contracts</div>
+        <div class="tip-body">After delivery, pitch a monthly retainer for maintenance and improvements. Even $300–500/mo recurring adds up fast and stabilizes income.</div>
+      </div>
+    </div>
+  </div>
+</section> -->
+
+<footer>
+  <div style="margin-bottom: 1rem;">
+    <span style="color: var(--text); font-weight: bold; font-family: 'Syne', sans-serif;">Siddharth Soni</span> • <span style="color: var(--accent1);">+91 6377921784</span>
+  </div>
+Engineered by <strong>Siddharth Soni</strong> — Automating the future of business.
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx + 'px';
+    cursor.style.top = my + 'px';
+  });
+
+  function animRing() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    ring.style.left = rx + 'px';
+    ring.style.top = ry + 'px';
+    requestAnimationFrame(animRing);
+  }
+  animRing();
+
+  // Scroll animations
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
